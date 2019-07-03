@@ -37,7 +37,7 @@ export default class App extends Vue {
       });
     }
 
-    static updated(): void {
+    updated(): void {
       ui.start('#firebaseui-auth-container', uiConfig);
     }
 }
