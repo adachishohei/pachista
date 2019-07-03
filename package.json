@@ -41,7 +41,9 @@
       "@vue/airbnb",
       "@vue/typescript"
     ],
-    "rules": {},
+    "rules": {
+      "class-methods-use-this": ["error", { "exceptMethods": ["signOut", "updated"] }]
+    },
     "parserOptions": {
       "parser": "@typescript-eslint/parser"
     }
