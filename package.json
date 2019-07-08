@@ -42,7 +42,15 @@
       "@vue/typescript"
     ],
     "rules": {
-      "class-methods-use-this": ["error", { "exceptMethods": ["signOut", "updated"] }]
+      "class-methods-use-this": [
+        "error",
+        {
+          "exceptMethods": [
+            "signOut",
+            "updated"
+          ]
+        }
+      ]
     },
     "parserOptions": {
       "parser": "@typescript-eslint/parser"

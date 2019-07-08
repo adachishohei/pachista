@@ -1,4 +1,4 @@
-# pachista
+# vuex-ts-firebase-sample
 
 ## Project setup
 ```
