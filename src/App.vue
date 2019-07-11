@@ -1,10 +1,13 @@
 <template>
   <div id="app">
-    <div key="login" v-if="userStatus">
+    <div v-if="_userStatus">
       <router-link to="/">Home</router-link>
       <router-link to="/about">About</router-link>
-      <LogOut></LogOut>
+      <button @click="doLogout" type="button">LogOut</button>
       <router-view/>
+      <input type="text" v-model="title"/>
+      <button @click="addTodo(title)">追加</button>
+      <TodoList v-bind:todoList="this.todoList"></TodoList>
     </div>
     <div v-else>
       <div id="firebaseui-auth-container"></div>
@@ -15,38 +18,47 @@
 <script lang="ts">
 
 import { Component, Vue } from 'vue-property-decorator';
-import { firebase, ui, uiConfig } from '@/config/firebase';
-import LogOut from '@/components/LogOut.vue';
-import store from '@/store';
+import Firebase from '@/config/firebase';
+import TodoList from '@/components/TodoList.vue';
+
+  import DocumentData = firebase.firestore.DocumentData;
 
   @Component({
-    components: { LogOut },
+    components: { TodoList },
+    computed: {
+      _user() {
+        return this.$store.getters.user;
+      },
+      _userStatus(): boolean {
+        return this.$store.getters.isSignedIn;
+      },
+    },
   })
 export default class App extends Vue {
-  created(): void {
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        store.commit('onAuthStateChanged', user);
-        store.commit('onUserStatusChanged', true);
-      } else {
-        store.commit('onAuthStateChanged', {});
-        store.commit('onUserStatusChanged', false);
-        ui.start('#firebaseui-auth-container', uiConfig);
-      }
-    });
-  }
+    title: string = '';
 
-  updated(): void {
-    ui.start('#firebaseui-auth-container', uiConfig);
-  }
+    todoList: { id: string, data: DocumentData }[] = [];
 
-  get user(): string {
-    return this.$store.getters.user;
-  }
+    created(): void {
+      Firebase.onAuth();
+    }
 
-  get userStatus(): boolean {
-    return this.$store.getters.isSignedIn;
-  }
+    updated(): void {
+      Firebase.uiStart();
+    }
+
+    beforeMount(): void {
+      this.todoList = Firebase.fetchTodo();
+    }
+
+    public addTodo() {
+      Firebase.addTodo(this.title);
+      this.title = '';
+    }
+
+    public doLogout() {
+      Firebase.logout();
+    }
 }
 </script>
 

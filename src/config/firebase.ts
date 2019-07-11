@@ -1,5 +1,7 @@
 import firebase from 'firebase';
-import * as firebaseui from 'firebaseui';
+import store from "@/store";
+import * as firebaseui from "firebaseui";
+import DocumentData = firebase.firestore.DocumentData;
 
 const config = {
   apiKey: 'AIzaSyAV0MkVcVMuZaoEDMAfcyDnbp8OUEC_8DA',
@@ -19,6 +21,56 @@ const uiConfig = {
 };
 firebase.initializeApp(config);
 const ui = new firebaseui.auth.AuthUI(firebase.auth());
-export {
-  firebase, ui, uiConfig,
+const db = firebase.firestore();
+export default {
+
+  logout() {
+    firebase.auth().signOut().then(() => {
+    }).catch((error) => {
+    });
+  },
+  onAuth() {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        store.commit('onAuthStateChanged', user);
+        store.commit('onUserStatusChanged', true);
+      } else {
+        store.commit('onUserStatusChanged', false);
+        ui.start('#firebaseui-auth-container', uiConfig);
+      }
+    });
+  },
+  uiStart() {
+    ui.start('#firebaseui-auth-container', uiConfig);
+  },
+  addTodo(title: string) {
+    db.collection("todos")
+      .add({
+        title: title,
+        status: false,
+      })
+      .then(() => {
+
+      })
+      .catch((error) => {
+        console.error(error)
+      });
+  },
+  fetchTodo(): { id: string, data: DocumentData }[] {
+    const todoList: { id: string, data: DocumentData }[] = [];
+    db.collection("todos")
+      .get()
+      .then((response) => {
+        response.forEach((doc) => {
+          todoList.push({
+            id: doc.id,
+            data: doc.data(),
+          });
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    return todoList;
+  },
 };
